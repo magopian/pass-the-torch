@@ -1,0 +1,26 @@
+{
+  "name": "pass-the-torch",
+  "version": "1.0.0",
+  "description": "A way to track who's currently in charge (holding the torch) in a workflow",
+  "scripts": {
+    "build": "node_modules/.bin/elm-make src/Main.elm --output=app.js",
+    "debug": "node_modules/.bin/elm-live src/Main.elm --output=app.js -- --debug",
+    "live": "node_modules/.bin/elm-live src/Main.elm --output=app.js",
+    "publish-to-gh-pages": "npm run build && mkdir -p build/ && cp index.html build/ && cp app.js build/ && node_modules/.bin/gh-pages --dist build/ && echo 'deployed to https://magopian.github.io/pass-the-torch/'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/magopian/pass-the-torch.git"
+  },
+  "author": "Mathieu Agopian",
+  "license": "MPL",
+  "bugs": {
+    "url": "https://github.com/magopian/pass-the-torch/issues"
+  },
+  "homepage": "https://github.com/magopian/pass-the-torch#readme",
+  "devDependencies": {
+    "elm": "^0.18.0",
+    "elm-live": "^2.6.0",
+    "gh-pages": "^0.11.0"
+  }
+}
