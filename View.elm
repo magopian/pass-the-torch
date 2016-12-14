@@ -15,7 +15,7 @@ view model =
             [ Html.text "Who's holding the torch?" ]
         , Html.div
             []
-            (List.indexedMap viewStep model.workflow)
+            (List.indexedMap (viewStep model) model.workflow)
         , Html.h2
             []
             [ Html.text "Add a new step" ]
@@ -23,22 +23,9 @@ view model =
             [ Html.Attributes.class "well"
             , Html.Events.onSubmit AddStep
             ]
-            [ formGroup
-                "Title"
-                (input model.title "Frobnicate the bizbaz" NewTitle)
-            , formGroup
-                "Content"
-                (Html.textarea
-                    [ Html.Attributes.class "form-control"
-                    , Html.Attributes.placeholder "Lengthy description"
-                    , Html.Attributes.value model.content
-                    , Html.Events.onInput NewContent
-                    ]
-                    []
-                )
-            , formGroup
-                "Bearer"
-                (input model.bearer "person@in.charge.com" NewBearer)
+            [ Html.div
+                []
+                (torchForm model)
             , Html.input
                 [ Html.Attributes.class "btn btn-primary"
                 , Html.Attributes.type_ "submit"
@@ -47,6 +34,27 @@ view model =
                 []
             ]
         ]
+
+
+torchForm : Model -> List (Html.Html Msg)
+torchForm model =
+    [ formGroup
+        "Title"
+        (input model.title "Frobnicate the bizbaz" NewTitle)
+    , formGroup
+        "Content"
+        (Html.textarea
+            [ Html.Attributes.class "form-control"
+            , Html.Attributes.placeholder "Lengthy description"
+            , Html.Attributes.value model.content
+            , Html.Events.onInput NewContent
+            ]
+            []
+        )
+    , formGroup
+        "Bearer"
+        (input model.bearer "person@in.charge.com" NewBearer)
+    ]
 
 
 formGroup : String -> Html.Html Msg -> Html.Html Msg
@@ -95,8 +103,8 @@ viewTorch torch =
         ]
 
 
-viewStep : Int -> Step -> Html.Html Msg
-viewStep index step =
+viewStep : Model -> Int -> Step -> Html.Html Msg
+viewStep model index step =
     Html.div
         [ Html.Attributes.class <| panelClass (isStepDone step) ]
         [ Html.div
@@ -129,6 +137,48 @@ viewStep index step =
                             |> List.map viewTorch
                             |> List.intersperse (Html.h4 [] [ Html.text "and" ])
                         )
+            ]
+        , Html.div
+            [ Html.Attributes.class "panel-footer" ]
+            [ let
+                addTorchBtn =
+                    Html.button
+                        [ Html.Attributes.class "btn btn-primary btn-xs"
+                        , Html.Events.onClick (NewTorch index)
+                        ]
+                        [ Html.text "Add a new torch" ]
+
+                cancelTorchBtn =
+                    Html.a
+                        [ Html.Attributes.class "btn btn-link btn-xs"
+                        , Html.Attributes.href "#"
+                        , Html.Events.onClick CancelNewTorch
+                        ]
+                        [ Html.text "Cancel" ]
+              in
+                case model.newTorch of
+                    Nothing ->
+                        addTorchBtn
+
+                    Just stepIndex ->
+                        if stepIndex == index then
+                            Html.form
+                                [ Html.Attributes.class "well"
+                                , Html.Events.onSubmit (AddTorch index)
+                                ]
+                                [ Html.div
+                                    []
+                                    (torchForm model)
+                                , Html.input
+                                    [ Html.Attributes.class "btn btn-primary btn-xs"
+                                    , Html.Attributes.type_ "submit"
+                                    , Html.Attributes.value "Add this new torch"
+                                    ]
+                                    []
+                                , cancelTorchBtn
+                                ]
+                        else
+                            addTorchBtn
             ]
         ]
 

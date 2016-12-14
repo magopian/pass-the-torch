@@ -10,6 +10,9 @@ type Msg
     | NewBearer String
     | AddStep
     | DeleteStep Int
+    | NewTorch Int
+    | CancelNewTorch
+    | AddTorch Int
 
 
 type Status
@@ -42,6 +45,7 @@ type alias Model =
     , title : String
     , content : String
     , bearer : String
+    , newTorch : Maybe Int
     }
 
 
@@ -64,6 +68,7 @@ init =
         ""
         ""
         ""
+        Nothing
     )
         ! []
 
@@ -129,6 +134,47 @@ update message model =
             in
                 { model | workflow = newWorkflow } ! []
 
+        NewTorch index ->
+            { model | newTorch = Just index } ! []
+
+        CancelNewTorch ->
+            { model | newTorch = Nothing } ! []
+
+        AddTorch index ->
+            let
+                newTorch =
+                    Torch
+                        model.currentId
+                        model.title
+                        model.content
+                        model.bearer
+                        Todo
+
+                updatedWorkflow =
+                    model.workflow
+                        |> List.indexedMap
+                            (\stepIndex step ->
+                                if stepIndex == index then
+                                    case step of
+                                        All torchList ->
+                                            All (torchList ++ [ newTorch ])
+
+                                        Any torchList ->
+                                            Any (torchList ++ [ newTorch ])
+                                else
+                                    step
+                            )
+            in
+                { model
+                    | title = ""
+                    , content = ""
+                    , bearer = ""
+                    , currentId = model.currentId + 1
+                    , newTorch = Nothing
+                    , workflow = updatedWorkflow
+                }
+                    ! []
+
 
 updateTorch : Int -> (Torch -> Torch) -> Workflow -> Workflow
 updateTorch id updateFunction workflow =
@@ -150,7 +196,3 @@ updateTorch id updateFunction workflow =
                     All (List.map changeTorch torchList)
     in
         List.map changeStep workflow
-
-
-
--- Main
