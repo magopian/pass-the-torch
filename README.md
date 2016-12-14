@@ -10,6 +10,6 @@ the torch, and then who the torch should be passed to when this person is done.
 - [x] Delete a step
 - [x] Add torches to any step
 - [x] Change a step to be Any or All
-- [ ] Only allow passing the torch on a step if the previous step is done
+- [x] Only allow passing the torch on a step if the previous step is done
 - [ ] Add auth, and only allow a bearer to pass the torch
 - [ ] Store in Kinto

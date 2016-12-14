@@ -77,30 +77,41 @@ input value placeholder onInput =
         []
 
 
-viewTorch : Torch -> Html.Html Msg
-viewTorch torch =
-    Html.div [ Html.Attributes.class <| panelClass (isTorchDone torch) ]
-        [ Html.div
-            [ Html.Attributes.class "panel-heading" ]
-            [ Html.text torch.title ]
-        , Html.div
-            [ Html.Attributes.class "panel-body" ]
-            [ Html.text torch.content ]
-        , Html.div
-            [ Html.Attributes.class "panel-footer" ]
-            [ Html.text <| "In charge: " ++ torch.bearer
+viewTorch : Bool -> Torch -> Html.Html Msg
+viewTorch stepEnabled torch =
+    let
+        done =
+            isTorchDone torch
+    in
+        Html.div [ Html.Attributes.class <| panelClass done ]
+            [ Html.div
+                [ Html.Attributes.class "panel-heading" ]
+                [ Html.text torch.title ]
             , Html.div
-                [ Html.Attributes.class "pull-right" ]
-                [ Html.button
-                    [ Html.Attributes.type_ "button"
-                    , Html.Attributes.class "btn btn-primary btn-xs"
-                    , Html.Attributes.disabled (isTorchDone torch)
-                    , Html.Events.onClick (UpdateStatus torch.id)
+                [ Html.Attributes.class "panel-body" ]
+                [ Html.text torch.content ]
+            , Html.div
+                [ Html.Attributes.class "panel-footer" ]
+                [ Html.text <| "In charge: " ++ torch.bearer
+                , Html.div
+                    [ Html.Attributes.class "pull-right" ]
+                    [ Html.button
+                        [ Html.Attributes.type_ "button"
+                        , Html.Attributes.class "btn btn-primary btn-xs"
+                        , Html.Attributes.disabled (done || not stepEnabled)
+                        , Html.Events.onClick (UpdateStatus torch.id)
+                        ]
+                        [ Html.text <|
+                            if done then
+                                "Already done"
+                            else if stepEnabled then
+                                "I'm Done"
+                            else
+                                "Complete previous steps first"
+                        ]
                     ]
-                    [ Html.text "I'm Done" ]
                 ]
             ]
-        ]
 
 
 viewStep : Model -> Int -> Step -> Html.Html Msg
@@ -135,7 +146,7 @@ viewStep model index step =
               in
                 Html.ul []
                     (step.torchList
-                        |> List.map viewTorch
+                        |> List.map (viewTorch (isEnabled model.workflow index))
                         |> List.intersperse (Html.h4 [] [ Html.text conjonction ])
                     )
             ]
@@ -216,6 +227,15 @@ isTorchDone torch =
 isStepDone : Step -> Bool
 isStepDone { torchList, allMandatory } =
     if allMandatory then
-        List.any isTorchDone torchList
-    else
         List.all isTorchDone torchList
+    else
+        List.any isTorchDone torchList
+
+
+isEnabled : Workflow -> Int -> Bool
+isEnabled workflow index =
+    let
+        previousSteps =
+            List.take index workflow
+    in
+        List.all isStepDone previousSteps
