@@ -18,7 +18,8 @@ type Status
 
 
 type alias Torch =
-    { id : Int
+    { -- Only used to know which torch we're editing/doing. Not ordered.
+      id : Int
     , title : String
     , content : String
     , bearer : String
@@ -27,9 +28,8 @@ type alias Torch =
 
 
 type Step
-    = Single Torch
+    = All (List Torch)
     | Any (List Torch)
-    | All (List Torch)
 
 
 type alias Workflow =
@@ -48,8 +48,8 @@ type alias Model =
 init : ( Model, Cmd Msg )
 init =
     (Model
-        [ Single (Torch 0 "foo" "bar" "foobar" Done)
-        , Single (Torch 1 "bar" "baz" "cruux" Todo)
+        [ All [ (Torch 0 "foo" "bar" "foobar" Done) ]
+        , All [ (Torch 1 "bar" "baz" "cruux" Todo) ]
         , Any
             [ Torch 2 "signoff" "foo" "foobar" Todo
             , Torch 3 "signoff" "bar" "cruux" Todo
@@ -58,7 +58,7 @@ init =
             [ Torch 4 "build foo" "http://example.com" "John" Todo
             , Torch 5 "build bar" "http://example.com" "John" Todo
             ]
-        , Single (Torch 6 "finished" "The workflow ended" "John Doe" Todo)
+        , All [ (Torch 6 "finished" "The workflow ended" "John Doe" Todo) ]
         ]
         7
         ""
@@ -117,7 +117,7 @@ update message model =
                     , content = ""
                     , bearer = ""
                     , currentId = model.currentId + 1
-                    , workflow = model.workflow ++ [ Single newTorch ]
+                    , workflow = model.workflow ++ [ All [ newTorch ] ]
                 }
                     ! []
 
@@ -143,9 +143,6 @@ updateTorch id updateFunction workflow =
         changeStep : Step -> Step
         changeStep step =
             case step of
-                Single torch ->
-                    Single (changeTorch torch)
-
                 Any torchList ->
                     Any (List.map changeTorch torchList)
 

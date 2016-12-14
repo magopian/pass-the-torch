@@ -116,9 +116,6 @@ viewStep index step =
         , Html.div
             [ Html.Attributes.class "panel-body" ]
             [ case step of
-                Single torch ->
-                    viewTorch torch
-
                 Any torchList ->
                     Html.ul []
                         (torchList
@@ -152,9 +149,6 @@ isTorchDone torch =
 isStepDone : Step -> Bool
 isStepDone step =
     case step of
-        Single torch ->
-            isTorchDone torch
-
         Any torchList ->
             List.any isTorchDone torchList
 
