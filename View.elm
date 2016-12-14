@@ -101,7 +101,18 @@ viewStep index step =
         [ Html.Attributes.class <| panelClass (isStepDone step) ]
         [ Html.div
             [ Html.Attributes.class "panel-heading" ]
-            [ Html.h5 [] [ Html.text <| "Step: " ++ (toString index) ] ]
+            [ Html.text <| "Step: " ++ (toString index)
+            , Html.a
+                [ Html.Attributes.class "pull-right"
+                , Html.Attributes.href "#"
+                ]
+                [ Html.i
+                    [ Html.Attributes.class "glyphicon glyphicon-trash"
+                    , Html.Events.onClick (DeleteStep index)
+                    ]
+                    []
+                ]
+            ]
         , Html.div
             [ Html.Attributes.class "panel-body" ]
             [ case step of

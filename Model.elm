@@ -9,6 +9,7 @@ type Msg
     | NewContent String
     | NewBearer String
     | AddStep
+    | DeleteStep Int
 
 
 type Status
@@ -119,6 +120,14 @@ update message model =
                     , workflow = model.workflow ++ [ Single newTorch ]
                 }
                     ! []
+
+        DeleteStep index ->
+            let
+                newWorkflow =
+                    (List.take index model.workflow)
+                        ++ (List.drop (index + 1) model.workflow)
+            in
+                { model | workflow = newWorkflow } ! []
 
 
 updateTorch : Int -> (Torch -> Torch) -> Workflow -> Workflow
