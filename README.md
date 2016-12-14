@@ -7,7 +7,7 @@ the torch, and then who the torch should be passed to when this person is done.
 ## Todo
 
 - [x] Append a new step using the form
-- [ ] Delete last step
+- [ ] Delete a step
 - [ ] Add torches to any step
 - [ ] Only allow passing the torch on a step if the previous step is done
 - [ ] Add auth, and only allow a bearer to pass the torch
