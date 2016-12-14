@@ -110,6 +110,9 @@ viewStep model index step =
         [ Html.div
             [ Html.Attributes.class "panel-heading" ]
             [ Html.text <| "Step: " ++ (toString index)
+            , Html.label
+                [ Html.Attributes.style [ ( "margin-left", "20px" ) ] ]
+                [ changeStepTypeForm index step ]
             , Html.a
                 [ Html.Attributes.class "pull-right"
                 , Html.Attributes.href "#"
@@ -181,6 +184,31 @@ viewStep model index step =
                             addTorchBtn
             ]
         ]
+
+
+changeStepTypeForm : Int -> Step -> Html.Html Msg
+changeStepTypeForm index step =
+    let
+        checked =
+            case step of
+                Any _ ->
+                    False
+
+                All _ ->
+                    True
+    in
+        Html.label
+            []
+            [ Html.input
+                [ Html.Attributes.checked checked
+                , Html.Attributes.name <| "step-type" ++ (toString index)
+                , Html.Attributes.style [ ( "margin-left", "10px" ) ]
+                , Html.Attributes.type_ "checkbox"
+                , Html.Events.onCheck (ChangeStepToAll index)
+                ]
+                []
+            , Html.text " All mandatory"
+            ]
 
 
 panelClass : Bool -> String

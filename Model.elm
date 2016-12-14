@@ -13,6 +13,7 @@ type Msg
     | NewTorch Int
     | CancelNewTorch
     | AddTorch Int
+    | ChangeStepToAll Int Bool
 
 
 type Status
@@ -151,19 +152,17 @@ update message model =
                         Todo
 
                 updatedWorkflow =
-                    model.workflow
-                        |> List.indexedMap
-                            (\stepIndex step ->
-                                if stepIndex == index then
-                                    case step of
-                                        All torchList ->
-                                            All (torchList ++ [ newTorch ])
+                    updateStep
+                        index
+                        (\step ->
+                            case step of
+                                All torchList ->
+                                    All (torchList ++ [ newTorch ])
 
-                                        Any torchList ->
-                                            Any (torchList ++ [ newTorch ])
-                                else
-                                    step
-                            )
+                                Any torchList ->
+                                    Any (torchList ++ [ newTorch ])
+                        )
+                        model.workflow
             in
                 { model
                     | title = ""
@@ -174,6 +173,42 @@ update message model =
                     , workflow = updatedWorkflow
                 }
                     ! []
+
+        ChangeStepToAll index bool ->
+            let
+                updatedWorkflow =
+                    updateStep
+                        index
+                        (\step ->
+                            case step of
+                                Any torchList ->
+                                    if bool then
+                                        All torchList
+                                    else
+                                        step
+
+                                All torchList ->
+                                    if not bool then
+                                        Any torchList
+                                    else
+                                        step
+                        )
+                        model.workflow
+            in
+                { model | workflow = updatedWorkflow } ! []
+
+
+updateStep : Int -> (Step -> Step) -> Workflow -> Workflow
+updateStep id updateFunction workflow =
+    let
+        changeStep : Int -> Step -> Step
+        changeStep stepIndex step =
+            if stepIndex == id then
+                updateFunction step
+            else
+                step
+    in
+        List.indexedMap changeStep workflow
 
 
 updateTorch : Int -> (Torch -> Torch) -> Workflow -> Workflow
