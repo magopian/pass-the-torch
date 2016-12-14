@@ -10,6 +10,10 @@ import Html.Events
 
 type Msg
     = UpdateStatus Int
+    | NewTitle String
+    | NewContent String
+    | NewBearer String
+    | AddStep
 
 
 type Status
@@ -39,6 +43,9 @@ type alias Workflow =
 type alias Model =
     { workflow : Workflow
     , currentId : Int
+    , title : String
+    , content : String
+    , bearer : String
     }
 
 
@@ -58,6 +65,9 @@ init =
         , Single (Torch 6 "finished" "The workflow ended" "John Doe" Todo)
         ]
         7
+        ""
+        ""
+        ""
     )
         ! []
 
@@ -86,6 +96,34 @@ update message model =
                         model.workflow
             in
                 { model | workflow = updatedWorkflow } ! []
+
+        NewTitle title ->
+            { model | title = title } ! []
+
+        NewContent content ->
+            { model | content = content } ! []
+
+        NewBearer bearer ->
+            { model | bearer = bearer } ! []
+
+        AddStep ->
+            let
+                newTorch =
+                    Torch
+                        model.currentId
+                        model.title
+                        model.content
+                        model.bearer
+                        Todo
+            in
+                { model
+                    | title = ""
+                    , content = ""
+                    , bearer = ""
+                    , currentId = model.currentId + 1
+                    , workflow = model.workflow ++ [ Single newTorch ]
+                }
+                    ! []
 
 
 updateTorch : Int -> (Torch -> Torch) -> Workflow -> Workflow
@@ -119,7 +157,35 @@ updateTorch id updateFunction workflow =
 
 view : Model -> Html.Html Msg
 view model =
-    Html.div [] (List.map viewStep model.workflow)
+    Html.div
+        []
+        [ Html.div [] (List.map viewStep model.workflow)
+        , Html.form
+            [ Html.Events.onSubmit AddStep ]
+            [ viewInput model.title "Title" "torch title" NewTitle
+            , viewInput model.content "Content" "torch description" NewContent
+            , viewInput model.bearer "Bearer" "torch bearer (person in charge)" NewBearer
+            , Html.input
+                [ Html.Attributes.type_ "submit"
+                , Html.Attributes.value "Add this new step"
+                ]
+                []
+            ]
+        ]
+
+
+viewInput : String -> String -> String -> (String -> Msg) -> Html.Html Msg
+viewInput value text placeholder onInput =
+    Html.div
+        []
+        [ Html.label [] [ Html.text text ]
+        , Html.input
+            [ Html.Attributes.placeholder placeholder
+            , Html.Attributes.value value
+            , Html.Events.onInput onInput
+            ]
+            []
+        ]
 
 
 viewTorch : Torch -> Html.Html Msg
