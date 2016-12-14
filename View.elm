@@ -112,7 +112,7 @@ viewStep model index step =
             [ Html.text <| "Step: " ++ (toString index)
             , Html.label
                 [ Html.Attributes.style [ ( "margin-left", "20px" ) ] ]
-                [ changeStepTypeForm index step ]
+                [ changeAllMandatoryForm index step ]
             , Html.a
                 [ Html.Attributes.class "pull-right"
                 , Html.Attributes.href "#"
@@ -126,20 +126,18 @@ viewStep model index step =
             ]
         , Html.div
             [ Html.Attributes.class "panel-body" ]
-            [ case step of
-                Any torchList ->
-                    Html.ul []
-                        (torchList
-                            |> List.map viewTorch
-                            |> List.intersperse (Html.h4 [] [ Html.text "or" ])
-                        )
-
-                All torchList ->
-                    Html.ul []
-                        (torchList
-                            |> List.map viewTorch
-                            |> List.intersperse (Html.h4 [] [ Html.text "and" ])
-                        )
+            [ let
+                conjonction =
+                    if step.allMandatory then
+                        "and"
+                    else
+                        "or"
+              in
+                Html.ul []
+                    (step.torchList
+                        |> List.map viewTorch
+                        |> List.intersperse (Html.h4 [] [ Html.text conjonction ])
+                    )
             ]
         , Html.div
             [ Html.Attributes.class "panel-footer" ]
@@ -186,29 +184,20 @@ viewStep model index step =
         ]
 
 
-changeStepTypeForm : Int -> Step -> Html.Html Msg
-changeStepTypeForm index step =
-    let
-        checked =
-            case step of
-                Any _ ->
-                    False
-
-                All _ ->
-                    True
-    in
-        Html.label
-            []
-            [ Html.input
-                [ Html.Attributes.checked checked
-                , Html.Attributes.name <| "step-type" ++ (toString index)
-                , Html.Attributes.style [ ( "margin-left", "10px" ) ]
-                , Html.Attributes.type_ "checkbox"
-                , Html.Events.onCheck (ChangeStepToAll index)
-                ]
-                []
-            , Html.text " All mandatory"
+changeAllMandatoryForm : Int -> Step -> Html.Html Msg
+changeAllMandatoryForm index step =
+    Html.label
+        []
+        [ Html.input
+            [ Html.Attributes.checked step.allMandatory
+            , Html.Attributes.name <| "step-type" ++ (toString index)
+            , Html.Attributes.style [ ( "margin-left", "10px" ) ]
+            , Html.Attributes.type_ "checkbox"
+            , Html.Events.onCheck (ChangeAllMandatory index)
             ]
+            []
+        , Html.text " All mandatory"
+        ]
 
 
 panelClass : Bool -> String
@@ -225,10 +214,8 @@ isTorchDone torch =
 
 
 isStepDone : Step -> Bool
-isStepDone step =
-    case step of
-        Any torchList ->
-            List.any isTorchDone torchList
-
-        All torchList ->
-            List.all isTorchDone torchList
+isStepDone { torchList, allMandatory } =
+    if allMandatory then
+        List.any isTorchDone torchList
+    else
+        List.all isTorchDone torchList

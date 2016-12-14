@@ -13,7 +13,7 @@ type Msg
     | NewTorch Int
     | CancelNewTorch
     | AddTorch Int
-    | ChangeStepToAll Int Bool
+    | ChangeAllMandatory Int Bool
 
 
 type Status
@@ -31,9 +31,10 @@ type alias Torch =
     }
 
 
-type Step
-    = All (List Torch)
-    | Any (List Torch)
+type alias Step =
+    { torchList : List Torch
+    , allMandatory : Bool
+    }
 
 
 type alias Workflow =
@@ -53,17 +54,20 @@ type alias Model =
 init : ( Model, Cmd Msg )
 init =
     (Model
-        [ All [ (Torch 0 "foo" "bar" "foobar" Done) ]
-        , All [ (Torch 1 "bar" "baz" "cruux" Todo) ]
-        , Any
+        [ Step [ (Torch 0 "foo" "bar" "foobar" Done) ] True
+        , Step [ (Torch 1 "bar" "baz" "cruux" Todo) ] True
+        , Step
             [ Torch 2 "signoff" "foo" "foobar" Todo
             , Torch 3 "signoff" "bar" "cruux" Todo
             ]
-        , All
+            False
+        , Step
             [ Torch 4 "build foo" "http://example.com" "John" Todo
             , Torch 5 "build bar" "http://example.com" "John" Todo
             ]
-        , All [ (Torch 6 "finished" "The workflow ended" "John Doe" Todo) ]
+            True
+        , Step [ (Torch 6 "finished" "The workflow ended" "John Doe" Todo) ]
+            True
         ]
         7
         ""
@@ -123,7 +127,7 @@ update message model =
                     , content = ""
                     , bearer = ""
                     , currentId = model.currentId + 1
-                    , workflow = model.workflow ++ [ All [ newTorch ] ]
+                    , workflow = model.workflow ++ [ Step [ newTorch ] True ]
                 }
                     ! []
 
@@ -155,12 +159,7 @@ update message model =
                     updateStep
                         index
                         (\step ->
-                            case step of
-                                All torchList ->
-                                    All (torchList ++ [ newTorch ])
-
-                                Any torchList ->
-                                    Any (torchList ++ [ newTorch ])
+                            { step | torchList = step.torchList ++ [ newTorch ] }
                         )
                         model.workflow
             in
@@ -174,24 +173,13 @@ update message model =
                 }
                     ! []
 
-        ChangeStepToAll index bool ->
+        ChangeAllMandatory index allMandatory ->
             let
                 updatedWorkflow =
                     updateStep
                         index
                         (\step ->
-                            case step of
-                                Any torchList ->
-                                    if bool then
-                                        All torchList
-                                    else
-                                        step
-
-                                All torchList ->
-                                    if not bool then
-                                        Any torchList
-                                    else
-                                        step
+                            { step | allMandatory = allMandatory }
                         )
                         model.workflow
             in
@@ -223,11 +211,6 @@ updateTorch id updateFunction workflow =
 
         changeStep : Step -> Step
         changeStep step =
-            case step of
-                Any torchList ->
-                    Any (List.map changeTorch torchList)
-
-                All torchList ->
-                    All (List.map changeTorch torchList)
+            { step | torchList = List.map changeTorch step.torchList }
     in
         List.map changeStep workflow
