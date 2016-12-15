@@ -54,22 +54,74 @@ type alias Model =
 init : ( Model, Cmd Msg )
 init =
     (Model
-        [ Step [ (Torch 0 "foo" "bar" "foobar" Done) ] True
-        , Step [ (Torch 1 "bar" "baz" "cruux" Todo) ] True
+        [ Step
+            [ (Torch
+                0
+                "Build a workflow tool"
+                "It should be a very simple tool, very basic, used as a proof of concept"
+                "magopian@mozilla.com"
+                Done
+              )
+            ]
+            True
         , Step
-            [ Torch 2 "signoff" "foo" "foobar" Todo
-            , Torch 3 "signoff" "bar" "cruux" Todo
+            [ (Torch
+                1
+                "Edit the workflow"
+                "Add steps, add torches to steps, change step to be 'all mandatory' or not"
+                "magopian@mozilla.com"
+                Todo
+              )
+            ]
+            True
+        , Step
+            [ Torch
+                2
+                "Review"
+                "Have a review from natim"
+                "rhubscher@mozilla.com"
+                Todo
+            , Torch
+                3
+                "Review"
+                "Have a review from n1k0"
+                "nperriault@mozilla.com"
+                Todo
+            , Torch
+                4
+                "Review"
+                "Have a review from glasserc"
+                "eglassercamp@mozilla.com"
+                Todo
             ]
             False
         , Step
-            [ Torch 4 "build foo" "http://example.com" "John" Todo
-            , Torch 5 "build bar" "http://example.com" "John" Todo
+            [ Torch
+                5
+                "Build the proof of concept"
+                "`npm run build`"
+                "magopian@mozilla.com"
+                Todo
+            , Torch
+                6
+                "Publish to github pages"
+                "`npm run publish-to-gh-pages` then visit https://magopian.github.io/pass-the-torch/index.html"
+                "magopian@mozilla.com"
+                Todo
             ]
             True
-        , Step [ (Torch 6 "finished" "The workflow ended" "John Doe" Todo) ]
+        , Step
+            [ (Torch
+                7
+                "Profit"
+                "The workflow ended, time to celebrate!"
+                "@all"
+                Todo
+              )
+            ]
             True
         ]
-        7
+        8
         ""
         ""
         ""

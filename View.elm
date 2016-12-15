@@ -3,6 +3,7 @@ module View exposing (view)
 import Html
 import Html.Attributes
 import Html.Events
+import Markdown
 import Model exposing (..)
 
 
@@ -89,7 +90,7 @@ viewTorch stepEnabled torch =
                 [ Html.text torch.title ]
             , Html.div
                 [ Html.Attributes.class "panel-body" ]
-                [ Html.text torch.content ]
+                [ Markdown.toHtml [] torch.content ]
             , Html.div
                 [ Html.Attributes.class "panel-footer" ]
                 [ Html.text <| "In charge: " ++ torch.bearer
